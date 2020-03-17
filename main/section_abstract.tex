@@ -1,0 +1,17 @@
+%%%% Time-stamp: <2013-02-25 10:31:01 vk>
+
+
+\chapter*{Abstract}
+\label{cha:section_abstract}
+Fitting a statistical model to data is one of the most important tools in any scientific or data-driven field, and rigorously fitting a two dimensional statistical model to data that has intrinsic uncertainties (error bars) in both the independent variable and the dependent variable is a daunting task, especially if the data also has extrinsic uncertainty (sample variance) that cannot be fully accounted for by the error bars. Here, I introduce a novel statistic (described as the Trotter, Reichart, Konz statistic, or TRK) developed in \textcite{trotter} that is advantageous towards model-fitting in this ``worst-case data'' scenario, especially when compared to other methods. I implemented this statistic as a suite of fitting algorithms in C++ that comes equipped with many capabilities, including: support for any nonlinear model; probability distribution generation, correlation removal and custom priors for model parameters; asymmetric uncertainties in the data and/or model, and more. I also built an end-to-end website through which the algorithm can be easily used easily but broadly, through a high degree of customizability. The statistic is applicable to practically any data-driven field, and I show a few astronomy-based examples of its usage. This thesis along with \textcite{trotter} form the foundations for \textcite{TRKIapjs}, in preparation. The TRK source code and web-based calculator can be found at \url{https://skynet.unc.edu/rcr/calculator/downloads} and \url{https://skynet.unc.edu/rcr/calculator/trk}, respectively.
+
+% \glsresetall %% all glossary entries should be used in long form (again)
+%% vim:foldmethod=expr
+%% vim:fde=getline(v\:lnum)=~'^%%%%\ .\\+'?'>1'\:'='
+%%% Local Variables:
+%%% mode: latex
+%%% mode: auto-fill
+%%% mode: flyspell
+%%% eval: (ispell-change-dictionary "en_US")
+%%% TeX-master: "main"
+%%% End:

@@ -1,0 +1,61 @@
+\chapter{Properties of the TRK Statistic}
+\label{cha:properties}
+
+\subsection{Invertibility}
+\label{sec:invertibility}
+A useful property for any two-dimensional statistic is that it is \textit{invertible}, i.e. that if fitting a dataset's $y$ vs $x$ data gives some model curve $y_c(x)$, fitting $x$ vs. $y$ gives the inverse $x_c(y)=y_c(x)^{-1}$. In the Bayesian formalism, a statistic is invertible if running these two inverted fits yields the same likelihood function (\textcite{trotter}). While mainly known to be used as a measure of the linear correlation of a dataset, one metric of invertibility is actually the ubiquitously-used Pearson Correlation Coefficient, $R^2$, of \textcite{pearson1896vii}. To see this, consider some linear model with slope $m_{yx}$ that was obtained by fitting to some $y$ vs. $x$ data. Similarly, fitting $x$ vs. $y$ for the same dataset gives some model line with slope $m_{xy}$. As shown in \textcite{trotter}, the correlation coefficient can then be found as $R^2\equiv m_{xy}m_{yx}$; therefore, if the statistic used to fit is invertible, and therefore $m_{xy}=1/m_{yx}$, we have that $R^2=1$. Proved by \textcite{trotter}, \textcite{the TRK statistic is completely invertible}. Therefore, by definition $R^2=1$ always for the TRK statistic, meaning that fitting results can always be trusted under inversion.
+
+\subsection{Scalability}
+\label{sec:scalability}
+Another important property of any statistic, although not immediately obvious, is its \textit{scalability}. Here, a statistic is defined to be \textit{scalable} if re-scaling the data along the $x-$ or $y-$ axis does not change the best fit arrived at from maximizing the likelihood. If a statistic is not scalable, then the best fit will \textit{depend} on the choice of units of measurement (or bases of the data axis if converted to some non-linear basis e.g. logarithmic), which can easily create unwanted behavior when fitting (see e.g. \textcite{trotter}), given that there is usually never any \textit{a priori} to choose some set of units over another.
+
+To examine the scalability of the TRK statistic, we will begin by noting that the statistic is invariant if both $x-$ and $y-$ axes are rescaled by the same factor, shown in \textcite{trotter}. As such, any rescaling that potentially affects the TRK statistic can always be defined as rescaling only the $y-$axis by some numerical factor $s$\footnote{Equivalently we can define $s\equiv s_y/s_x$, where $s_y$ is the standalone rescaling of the $y-$axis, and $s_x$ is the same for the $x-$axis.}. In order to see the effect of data rescaling within the TRK statistic, I multiply all $y-$axis dependent terms by some $s$ within the TRK likelihood of Equation \eqref{eq:TRK}, which gives
+\begin{align}\label{eq:TRK_scaled}
+\mathcal{L}_s^{\mathrm {TRK}} & \propto \prod_{n=1}^N{ \sqrt{\frac{m_{t,n}^2\Sigma_{x,n}^2+\Sigma_{y,n}^2}{m_{t,n}^2\Sigma_{x,n}^4+s^2\Sigma_{y,n}^4}}\exp\left\{-\frac{1}{2}\frac{\left[y_n-y_{t,n}-m_{t,n}(x_n-x_{t,n})\right]^2}{m_{t,n}^2\Sigma_{x,n}^2+\Sigma_{y,n}^2}\right\}} \nonumber \\*
+& \not\propto \mathcal{L}^{\mathrm {TRK}} \mbox{~~for a fixed $s$}\, .
+\end{align}
+As such, the standalone TRK statisic is \textit{not} scalable, so different choices of scale will result in different best fit model parameters, including slop/extrinsic scatter ($\sigma_x,\sigma_y$). Not only this, but it is impossible to determine anything about the relative fitness of best fits solely given numerical values of the likelihood function; what this means in practice is that the scaling factor $s$ can not be fit to as a model parameter (\textcite{trotter}). However, we will show in the following section that there \textit{is} a way to quantitatively compare TRK fits done at different scales, so that this hurdle can be negated.
+
+\subsection{The TRK Correlation Coefficient}
+\label{sec:TRKcorr}
+To begin, consider two TRK best fits gained from maximizing the likelihood (Equation \eqref{eq:TRK_scaled}) at different scales (i.e. different values for $s$), given some model and dataset. Because the TRK statistic is completely invertible, the Pearson Correlation Coefficient $R^2$ is $1$ for both fits. As such, in order to compare the two fits,  a new correlation coefficient needs to be defined that can quantify the variance of the statistic's predictions between them. By convention, the new coefficient should follow similar properties to $R^2$, insofar that it is restricted to the range of $[0,1]$, and that it equals 1 if the two best fit lines begin compared have the same slope (plotted in the same scale space).
+
+I will begin with the case of linear fits, and continue on to generalize to arbitrary non-linear models. \textcite{trotter} introduced a new correlation coefficient $R^2_\text{TRK}$ that is a function of the \textit{difference} of the slopes of the models, rather than the \textit{ratio}, as opposed to the Pearson $R^2$ (see \S\ref{sec:invertibility}). The \textit{scale-dependent} TRK correlation coefficient is defined as
+\begin{equation}\label{eq:r2TRKab}
+R_{\mathrm{TRK}}^{2}(a,b)\equiv \tan^2\left(\frac{\pi}{4}-\frac{\left|\theta_a-\theta_b\right|}{2}\right) \, .
+\end{equation}
+given a linear fit at $s=a$ with slope $m_a=\tan{\theta_a}$, and another at $s=b$ with slope $m_b=\tan{\theta_b}$\footnote{$R^2_\text{TRK}$ compares the \textit{angles} (off of the $x$-axis) $\left(\theta_a,\theta_b\right)$ of the lines rather than the \textit{slopes} $\left(m_a,m_b\right)$ for numerical efficacy, given that the former are restricted to the range of $\left(-\frac{\pi}{2},\frac{\pi}{2}\right)$, while the latter can be anywhere within $(-\infty,\infty)$.}. Clearly, if the two lines have the same slopes, $R^2_\text{TRK}=1$ as desired, and if the two lines differ in slope angle by $90^\circ$, i.e. they are orthogonal, $R^2_\text{TRK}=0$. Now that the difference between TRK fits at different scales can be compared, how do we determine the best scale at which to run a fit?
+
+Consider how rescaling will affect the slop parameters $\sigma_x$ and $\sigma_y$, i.e. how the total slop is distributed between these two parameters. \textcite{trotter} showed that in the limit of slop-dominated data (i.e. arbitrarily small/zero error bars $\left\{\sigma_{x,n},\sigma_{y,n}\right\}$ as compared to the extrinsic scatter/slop), $s\rightarrow 0$, $\sigma_x\rightarrow 0$; similarly, as $s\rightarrow \infty$, $\sigma_y\rightarrow 0$. This behavior occurs because as the scale $s$ of the dataset is changed, the distribution of the total slop between $\sigma_x$ and $\sigma_y$ is correspondingly affected. This range of $s\in[0,\infty)$ is considered to be the \textit{physically meaningful} range of fits. In the case of a dataset with non-zero error bars, this physically meaningful range becomes some subset interval $[a,b]\subset[0,\infty)$, where the number $a$ is described as the \textit{minimum scale}, while $b$ is the \textit{maximum scale}, as $\lim\limits_{s\rightarrow a^+}\sigma_x = 0$ and $\lim\limits_{s\rightarrow b^-}\sigma_y = 0$ (from \cite{trotter})\footnote{Here, I've taken the signs of the limits to indicate the direction of one-sided approach.}. As any fits done outside of this interval are inherently unphysical, there must be some optimum $s_0\in[a,b]$ that is the best scale at which to run a fit\footnote{By ``unphysical'', I mean that such scales require imaginary best fit slops, i.e. $(\sigma_x^2,\sigma_y^2)<0$ (\cite{trotter}).}.
+
+\label{par:scaleopscheme}In order to determine the optimum scale $s_0$, the following iterative approach defined within \textcite{trotter} is used. To begin, the first approximation of $s_0$, $s_0^{(1)}$, is found to be the scale at which
+\begin{equation}\label{eq:r2TRK}
+R^{2}_{\mathrm{TRK}}(a,s_0^{(1)}) = R^{2}_{\mathrm{TRK}}(s_0^{(1)},b) \equiv R^2_{\mathrm{TRK}} \, .
+\end{equation}
+From here, we shift from the $s=1$ space to this $s=s_0^{(1)}$ space, where the angles of the lines follow the transformation $\theta\rightarrow \arctan\left(s_0^{(1)}\tan\theta\right)$. The analysis of Equation \eqref{eq:r2TRK} is then repeated in this new space to determine the next approximation for the optimum scale, $s_0^{(2)}$, i.e. finding the $s_0^{(2)}$ such that,
+e.g. in the case of a linear model,
+\begin{align}\label{eq:r2TRKnewscalelin}
+R^2_{\mathrm{TRK}} & \equiv \tan^2\left(\frac{\pi}{4}-\frac{\left|\arctan (s_0^{(1)}\tan\theta_a)-\arctan (s_0^{(1)}\tan\theta_{s_0^{(2)}})\right|}{2}\right) \nonumber \\
+& =
+\tan^2\left(\frac{\pi}{4}-\frac{\left|\arctan (s_0^{(1)}\tan\theta_{s_0^{(2)}})-\arctan (s_0^{(1)}\tan\theta_b)\right|}{2}\right) \, ,
+\end{align}
+where $\theta_{s_0^{(2)}}$ is the position angle of the best-fit line at scale $s_0^{(2)}$, as measured in $s=1$ space. From here, we set $s_0^{(2)}\rightarrow s_0^{(1)}$, and repeat until convergence to the final value of $s_0$. It is at this optimum scale that we actually run fits, compute model parameter uncertainties (see \S\ref{sec:MCMC}), etc. The details of how Equation \eqref{eq:r2TRK} is solved in practice to determine $s_0$ are given in \S\ref{sec:scaleop}.
+
+The TRK correlation coefficient as given in Equation \eqref{eq:r2TRKab} can only be used for linear models. As such, \textcite{trotter} presented a logical generalization to nonlinear models, as the average of the differences of the slope angles at all $N$ tangent points at two scales $a$ and $b$:
+\begin{equation}\label{eq:R2TRKgen}
+R_{\mathrm{TRK}}^{2}(a,b)\equiv \frac{1}{N}\sum_{n=1}^{N}{\tan^2\left(\frac{\pi}{4}-\frac{\left|\theta_{t,n;a}-\theta_{t,n;b}\right|}{2}\right)} \, .
+\end{equation}
+Here, $\theta_{t,n;a}=\arctan m_{t,n;a}$ and $\theta_{t,n;b}=\arctan m_{t,n;b}$ are the position angles of the best-fit curves at the tangent point to the $n^\text{th}$ datapoint at scales $a$ and $b$, respectively. This expression for $R_{\mathrm{TRK}}^{2}$ can then be used to determine $s_0$ using the same method described by the previous section and Equation \eqref{eq:r2TRK}; in this case then, Equation \eqref{eq:r2TRKnewscalelin} becomes
+\begin{align}\label{eq:r2TRKnewscalenonlin}
+R^2_{\mathrm{TRK}} & \equiv \frac{1}{N}\sum_{n=1}^{N}\tan^2\left(\frac{\pi}{4}-\frac{\left|\arctan (s_0^{(1)}\tan\theta_{t,n;a})-\arctan (s_0^{(1)}\tan\theta_{s_0^{(2)}})\right|}{2}\right) \nonumber \\
+& =
+\frac{1}{N}\sum_{n=1}^{N}\tan^2\left(\frac{\pi}{4}-\frac{\left|\arctan (s_0^{(1)}\tan\theta_{s_0^{(2)}})-\arctan (s_0^{(1)}\tan\theta_{t,n;b})\right|}{2}\right) \, .
+\end{align}
+
+With this, we have covered all of the foundations and properties of the TRK statistic that are needed to describe how TRK fits are completed in practice. In the next chapter, I will delve into the suite of algorithms that I created to perform fitting, scale optimization, model parameter distribution generation, and other core fitting algorithms.
+%In the procedure described above, we defined both R02
+%TRF(a, b) (Equation 2.44), which
+%is a measure of the difference between the TRF fits at the two physically meaning-
+%ful extremes of scale, and R2T
+%RF (Equation 2.45), which is a measure of the difference
+%between the fit at the optimum scale s0 and the fit at either extreme.

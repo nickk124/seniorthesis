@@ -1,0 +1,153 @@
+\chapter{Additional Algorithm Listings}
+\label{app:algos}
+%\section{From \S\ref{sec:tgtfinder}}
+%\section{From \S\ref{sec:simplex}}
+Listed below are various algorithms that did not need to be given explicitly in the main text, but can be referenced here as needed.
+\begin{algorithm}
+\label{algo:simplexsteps}
+\caption{Downhill simplex evolution functions used in Algorithm \ref{algo:simplex} to minimize $-2\ln\mathcal{L}^\text{TRK}$.}
+\DontPrintSemicolon
+    \SetKwInOut{Input}{Input}
+    \SetKwInOut{Output}{Output}
+    \SetKwProg{Fn}{Function}{}{}
+    Initialize simplex evolution parameters $(\alpha,\beta,\gamma,\delta)=(1,2,0.5,0.5)$\;
+    \Fn{Expand}{
+        \Input{Simplex $\Delta$ with $\mathcal{M}+1$ vertices $v_i$}
+        \Output{Expanded $\Delta$}
+        Compute expansion point of $v_r$, $v_e\equiv c + \gamma(v_r-c)$.\;
+        \If{$\chi^2_e < \chi^2_r$}{
+            $v_\mathcal{M}\rightarrow v_e$\;
+        }
+        \Else{
+            $v_\mathcal{M}\rightarrow v_r$\;
+        }
+        \Return{$\Delta$}
+    }
+    \Fn{Contract}{
+        \Input{Simplex $\Delta$ with $\mathcal{M}+1$ vertices $v_i$}
+        \Output{Contracted $\Delta$}
+        Compute contraction point $v_c$, by using better of $v_\mathcal{M}$, $v_r$.\;
+        \If{$\chi^2_{\mathcal{M}-1} \leq \chi^2_r < \chi^2_{\mathcal{M}}$}{
+            \textit{Contract Outside:}\;
+            $v_c = c+\beta(v_r-c)$\;
+            \If{$\chi^2_c\leq\chi^2_r$}{
+                $v_\mathcal{M}\rightarrow v_c$
+            }
+            \Else{
+                \textit{Shrink}$(\Delta)$ (\textit{See function below})\;
+            }
+        }
+        \ElseIf{$\chi^2_r\geq chi^2_\mathcal{M}$}{
+            \textit{Contract Inside:}\;
+            $v_c = c+\beta(v_\mathcal{M}-c)$\;
+            \If{$\chi^2_c<\chi^2_\mathcal{M}$}{
+                $v_\mathcal{M}\rightarrow v_c$
+            }
+            \Else{
+                \textit{Shrink}$(\Delta)$\;
+            }
+        }
+        \Return{$\Delta$}
+    }
+    \Fn{Shrink}{
+        \Input{Simplex $\Delta$ with $\mathcal{M}+1$ vertices $v_i$}
+        \Output{Shrunken $\Delta$}
+        \For{$i=0,\cdots,\mathcal{M}$}{
+            $v_i \rightarrow v_0 + \delta(v_i-v_0)$\;
+        }
+        \Return{$\Delta$}
+    }
+\end{algorithm}
+
+\begin{algorithm}
+\label{algo:maxscale}
+\caption{Bracketing/Bisection-type method for determining maximum fitting scale $b$ for some model and dataset.}
+\DontPrintSemicolon
+    \SetKwInOut{Input}{Input}
+    \SetKwInOut{Output}{Output}
+    \SetKwProg{Fn}{Function}{}{}
+    \Fn{FindMinimumScale}{
+        \Input{Model $y_c$ and dataset $\{x_n,y_n\}$ with error bars $\{\sigma_{x,n}, \sigma_{y,n}\}$}
+        \Output{Maximum fitting scale $b$.}
+        \Begin{
+            \textit{Determine brackets $(l,r)$ for max scale $b$:}\;
+            Initialize bisection brackets $l = s = 0, r = s = 1$ and $s_\text{trial} = s = 1$\;
+            \textit{Note that in the actual code, a better $s_\text{trial}$ is found from the algorithm for finding $a$.}
+            $\sigma_y(s_\text{trial}) \leftarrow $\textit{ DownhillSimplex}($s=s_\text{trial}$)\;
+            Initialize step modifier $\alpha = 0.5\times s_\text{trial}$\;
+            \If{$\sigma_y(s_\text{trial}) > 0$}{
+                $l = s_\text{trial}$\;
+                $r_\text{trial}=s_\text{trial}$\;
+                $\sigma_y(r_\text{trial})=$\textit{DownhillSimplex}($s=r_\text{trial}$)\;
+                \While{$\sigma_y(r_\text{trial}) > 0$}{
+                    $r_\text{trial} = r_\text{trial}+\alpha$\;
+                    $\sigma_y(r_\text{trial})=$\textit{DownhillSimplex}($s=r_\text{trial}$)\;
+                    $l=r_\text{trial}$\;
+                }
+                $r=r_\text{trial}$\;
+            }
+            \ElseIf{$\sigma_y(s_\text{trial}) = 0$}{
+                $r = s_\text{trial}$\;
+                $l_\text{trial}=s_\text{trial}$\;
+                $\sigma_y(l_\text{trial})=$\textit{DownhillSimplex}($s=l_\text{trial}$)\;
+                \While{$\sigma_x(l_\text{trial}) = 0$}{
+                    $l_\text{trial} = l_\text{trial}-\alpha$\;
+                    $\sigma_y(l_\text{trial})=$\textit{DownhillSimplex}($s=l_\text{trial}$)\;
+                    $\alpha = 0.5\times\alpha$\;
+                    $r=l_\text{trial}$\;
+                }
+                $l=l_\text{trial}$\;
+            }
+            \textit{Use bisection to determine $b$ now that we have brackets $(l,r)$:}\;
+            $b_\text{trial} = (l+r)/2$\;
+            $\sigma_y(b_\text{trial})=$\textit{DownhillSimplex}($s=b_\text{trial}$)\;
+            \While{$\abs{l-r}\geq$ tolerance1 AND $\sigma_y(a_\text{trial})\geq$ tolerance2}{
+                $b_\text{trial} = (l+r)/2$\;
+                $\sigma_y(b_\text{trial})=$\textit{DownhillSimplex}($s=b_\text{trial}$)\;
+                \If{$\sigma_y(b_\text{trial})>0$}{
+                    $l = b_\text{trial}$\;
+                }
+                \ElseIf{$\sigma_y(b_\text{trial})=0$}{
+                    $r = b_\text{trial}$\;
+                }
+            }
+            \Return{$b=b_\text{trial}$}
+        }
+    }
+\end{algorithm}
+
+\begin{algorithm}
+\label{algo:opscaler2}
+\caption{Bisection-type method for determining optimum fitting scale $s_0$ for some model and dataset with minimum and maximum fitting scales $a$ and $b$.}
+\DontPrintSemicolon
+    \SetKwInOut{Input}{Input}
+    \SetKwInOut{Output}{Output}
+    \SetKwProg{Fn}{Function}{}{}
+    \Fn{FindOptimumScale}{
+        \Input{Model $y_c$ and dataset $\{x_n,y_n\}$ with error bars $\{\sigma_{x,n}, \sigma_{y,n}\}$, with minimum and maximum fitting scale $a$ and $b$.}
+        \Output{Optimum fitting scale $s_0$.}
+        \Begin{
+            Initialize $s_0^{(1)}=(a+b)/2$\;
+            \While{$\abs{s_0^{(2)} - s_0^{(1)}} \geq$ tolerance1}{
+                $s_0^{(1)} = s_0^{(2)}$\;
+                \textit{Use bisection to determine $s_0^{(2)}$ given $s_0^{(1)}$:}\;
+                Initialize brackets $l=a$, $r=b$\;
+                $s_{0,\text{trial}}^{(2)} = (l+r)/2$\;
+                $R_\text{trial}=$ Equation \eqref{eq:r2TRKnewscalenum} $\leftarrow$\textit{DownhillSimplex}($s=s_{0,\text{trial}}^{(2)}$)\;
+                \While{$\abs{l-r}\geq$ tolerance2 AND $\abs{R} \geq 0$}{
+                    $s_{0,\text{trial}}^{(2)} = (l+r)/2$\;
+                    $R_\text{trial}=$ Equation \eqref{eq:r2TRKnewscalenum} $\leftarrow$\textit{DownhillSimplex}($s=s_{0,\text{trial}}^{(2)}$)\;
+                    $R_l=$ Equation \eqref{eq:r2TRKnewscalenum} $\leftarrow$\textit{DownhillSimplex}($s=l$)\;
+                    \If{$R_\text{trial}\times R_l>0$}{
+                        $l = s_{0,\text{trial}}^{(2)}$\;
+                    }
+                    \ElseIf{$R_\text{trial}\times R_l<0$}{
+                        $r = s_{0,\text{trial}}^{(2)}$\;
+                    }
+                }
+                $s_0^{(2)} = s_{0,\text{trial}}^{(2)}$\;
+            }
+            \Return{Optimum scale $s_0=s_0^{(2)}$}\;
+        }
+    }
+\end{algorithm}
