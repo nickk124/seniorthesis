@@ -88,34 +88,60 @@ def drvc2(x, params, pivots):
 
     return top / bottom
 
+def x0(x, params, pivots):
+    bx0 = params[0]
+
+    return bx0
+
+def dx0(x, params, pivots):
+
+    return 0
+
+def gamma(x, params, pivots):
+    bgamma = params[0]
+
+    return bgamma
+
+def dgamma(x, params, pivots):
+
+    return 0
+
 # PARAMETERS
 
 hist_filenames = {
     "testlin":"testlin_sloppy_pivot_1000000.txt",
     "c1c2":"c1c2_100000.txt",
     "bhc2":"bhc2_100000.txt",
-    "rvc2":""
+    "rvc2":"rvc2_placeholder.txt",
+    "x0":"x0_100000.txt",
+    "gamma":"gamma_100000.txt"
 }
 
 data_filenames = {
     "testlin":"testlin_sloppy_pivot_1000000.txt",
     "c1c2":"c1c2_data.csv",
     "bhc2":"bhc2_data.csv",
-    "rvc2":"rvc2_data.csv"
+    "rvc2":"rvc2_data.csv",
+    "x0":"x0_data.csv",
+    "gamma":"gamma_data.csv"
 }
 
 xlabels = {
     "testlin":"$x$",
     "c1c2":"$c_2$",
     "bhc2":"$c_2$",
-    "rvc2":"$c_2$"
+    "rvc2":"$c_2$",
+    "x0":"$c_2$",
+    "gamma":"$c_2$"
 }
 
 ylabels = {
     "testlin":"$y$",
     "c1c2":"$c_1$",
     "bhc2":"BH",
-    "rvc2":"$R_V$"
+    "rvc2":"$R_V$",
+    "x0":"$x_0$",
+    "gamma":"$\gamma$"
 }
 
 best_fit_params = { # including slop
@@ -123,41 +149,52 @@ best_fit_params = { # including slop
     "c1c2":[-0.905186, -3.151891, 0.059483, 0.171067],
     "bhc2":[1.983692, 4.567873, 2.403995, -1.134415, 0.129025, 0.495434],
     # "rvc2":[5.558859, 1.603616, 2.716085, -0.302047, 0.361864, 0.234929] #scale of 4.5
-    "rvc2":[8.381753, 1.572174, 2.616336, -0.001609, 0.064738, 0.435423] # scale of 0.001953 
+    "rvc2":[3.233e+00, 1.574e+00, 2.802e+00, -2.160e-01, 0, 6.04E-01],
+    "x0":[4.60604, 0.01212, 0.03839],# ordered (+slop, -slop)
+    "gamma":[0.84195, 0.16949, 0.10605]
+}
 
 all_pivots = {
     # "testlin":
     "c1c2":[1.024747],
     "bhc2":[-0.086661, 1.334268],
-    "rvc2":[0.122825, 1.564339]
+    "rvc2":[-7.080e-02, 1.495e+00]
 }
 
 all_param_names = {
     "testlin":["$b$", "$m$", "$\sigma_x$", "$\sigma_y$"],
     "c1c2":["$b^{c_1}$", "$m^{c_1}$", "$\sigma_{c_2}^{c_1}$", "$\sigma_{c_1}$"],
     "bhc2":["$b_1^{BH}$", "$\\theta_1^{BH}$", "$b_2^{BH}$", "$\\theta_2^{BH}$", "$\sigma_{c_2}^{BH}$", "$\sigma_{BH}$"],
-    "rvc2":["$b_1^{R_V}$", "$\\theta_1^{R_V}$", "$b_2^{R_V}$", "$\\theta_2^{R_V}$", "$\sigma_{c_2}^{R_V}$", "$\sigma_{R_V}$"]
+    "rvc2":["$b_1^{R_V}$", "$\\theta_1^{R_V}$", "$b_2^{R_V}$", "$\\theta_2^{R_V}$", "$\sigma_{c_2}^{R_V}$", "$\sigma_{R_V}$"],
+    "x0":["$b_{x_0}$", "$\sigma_{x_0+}", "$\sigma_{x_0-}"],
+    "gamma":["$b_\gamma$", "$\sigma_{\gamma+}", "$\sigma_{\gamma-}"]
 }
 
 models = {
     "testlin":linear,
     "c1c2":linear,
     "bhc2":bhc2,
-    "rvc2":rvc2
+    "rvc2":rvc2,
+    "x0":x0,
+    "gamma":gamma
 }
 
 dModels = {
     "testlin":dLinear,
     "c1c2":dLinear,
     "bhc2":dbhc2,
-    "rvc2":drvc2
+    "rvc2":drvc2,
+    "x0":dx0,
+    "gamma":dgamma
 }
 
 all_param_plot_ranges_1D = {
     "testlin":((0,2), (4,8)),
     "c1c2":((-1.1, -0.8), (-3.4, -2.8), (0.0525, 0.065), (0.065, 0.265)),
     "bhc2":((1.96, 2.0), (4.565, 4.58), (2.404, 2.410), (-1.25, -1.1), (0.115, 0.14), (0.48, 0.53)),
-    "rvc2":((1.96, 2.0), (4.565, 4.58), (2.404, 2.410), (-1.25, -1.1), (0.115, 0.14), (0.48, 0.53))
+    "rvc2":((1.96, 2.0), (4.565, 4.58), (2.404, 2.410), (-1.25, -1.1), (0.115, 0.14), (0.48, 0.53)),
+    "x0":((4.595, 4.62), (0.005, 0.02), (0.03, 0.05)),
+    "gamma":((0.81, 0.88), (0.15, 0.19), (0.085, 0.13))
 }
 
 all_param_plot_ranges_2D = all_param_plot_ranges_1D
@@ -172,14 +209,18 @@ data_plot_ranges = {
     #"testlin":((0,2), (4,8)),
     "c1c2":((-1, 3), (-8, 7)),
     "bhc2":((-1, 3), (-1, 8)),
-    "rvc2":((-1, 3), (-1, 8))
+    "rvc2":((-1, 3), (-1, 8)),
+    "x0":((-1, 3), (4.2, 5)),
+    "gamma":((-1, 3), (0, 2))
 }
 
 all_figdims = {
     "testlin":(8,6),
     "c1c2":(8,6),
     "bhc2":(8,8),
-    "rvc2":(8,8)
+    "rvc2":(8,8),
+    "x0":(8,6),
+    "gamma":(8,6)
 }
 
 
@@ -189,8 +230,14 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(formatter_class=RawTextHelpFormatter)
     parser.add_argument("modelname", type=str, help="model name")
+    parser.add_argument("showposterior", type=bool, help="show posterior histogram")
     args = parser.parse_args()
     modelname = args.modelname
+    showposterior = args.showposterior
+
+    showposterior = False
+
+    print(showposterior)
 
     filename = os.path.join("./histdata/",hist_filenames[modelname])
     datafilename = os.path.join("./rawdata/",data_filenames[modelname])
@@ -240,11 +287,12 @@ if __name__ == '__main__':
 
     # print(pearsonr(a0, a1))
     
-
     R = param_samples[0].size
     bincount = np.int(np.sqrt(float(R)))
 
-    datawidth = x.ptp()
+    # print(type(x))
+
+    datawidth = np.ptp(x)
     x_m = np.linspace(np.min(x) - datawidth/3, np.max(x) + datawidth/3, 1000)
     y_m = model(x_m, fitted_params, pivots)
 
@@ -252,34 +300,37 @@ if __name__ == '__main__':
 
     plt.rc('axes', labelsize=12)     # fontsize of the axes label
 
-    plt.figure(num=1,figsize=figdims,dpi=100,facecolor='white')
-    # plot single-parameter histograms
-    inds = [1,3,4,6,7,9]
-    for j in range(M):
-        plt.subplot(M/2, 3, inds[j])
-        n, bins, patches = plt.hist(param_samples[j], bincount, density=True, facecolor='b', alpha=0.5)
-        plt.xlabel(param_names[j])
-        plt.ylabel("PDF")
-        plt.xlim(param_plot_ranges_1D[j])
-        plt.xticks(rotation=45)
-        plt.yticks(rotation=45)
 
-    # 2-param histograms
-    for j in range(M//2):
-        plt.subplot(M/2, 3, 2 + 3*j)
-        # Kernel density/contour plot
-        sns.kdeplot(param_samples[2*j], param_samples[2*j + 1], n_levels=3, shade=True, shade_lowest=False)
-        # circle = plt.Circle((bfit, mfit), 0.05, color='r')
-        # ax.add_artist(circle)
-        plt.xlabel(param_names[2*j])
-        plt.ylabel(param_names[2*j + 1])
-        plt.xlim(param_plot_ranges_2D[2*j])
-        plt.ylim(param_plot_ranges_2D[2*j + 1])
-        plt.xticks(rotation=45)
-        plt.yticks(rotation=45)
+    if (showposterior):
 
-    plt.tight_layout()
-    plt.show()
+        plt.figure(num=1,figsize=figdims,dpi=100,facecolor='white')
+        # plot single-parameter histograms
+        inds = [1,3,4,6,7,9]
+        for j in range(M):
+            plt.subplot(M/2, 3, inds[j])
+            n, bins, patches = plt.hist(param_samples[j], bincount, density=True, facecolor='b', alpha=0.5)
+            plt.xlabel(param_names[j])
+            plt.ylabel("PDF")
+            plt.xlim(param_plot_ranges_1D[j])
+            plt.xticks(rotation=45)
+            plt.yticks(rotation=45)
+
+        # 2-param histograms
+        for j in range(M//2):
+            plt.subplot(M/2, 3, 2 + 3*j)
+            # Kernel density/contour plot
+            sns.kdeplot(param_samples[2*j], param_samples[2*j + 1], n_levels=3, shade=True, shade_lowest=False)
+            # circle = plt.Circle((bfit, mfit), 0.05, color='r')
+            # ax.add_artist(circle)
+            plt.xlabel(param_names[2*j])
+            plt.ylabel(param_names[2*j + 1])
+            plt.xlim(param_plot_ranges_2D[2*j])
+            plt.ylim(param_plot_ranges_2D[2*j + 1])
+            plt.xticks(rotation=45)
+            plt.yticks(rotation=45)
+
+        plt.tight_layout()
+        plt.show()
 
     # FONT SIZES
     SMALL_SIZE = 12
