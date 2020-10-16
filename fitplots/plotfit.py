@@ -112,9 +112,9 @@ hist_filenames = {
     "testlin":"testlin_sloppy_pivot_1000000.txt",
     "c1c2":"c1c2_100000.txt",
     "bhc2":"bhc2_100000.txt",
-    "rvc2":"rvc2_placeholder.txt",
-    "x0":"x0_100000.txt",
-    "gamma":"gamma_100000.txt"
+    "rvc2":"rvc2_50000.txt",
+    "x0":"x0_placeholder.txt",
+    "gamma":"gamma_placeholder.txt"
 }
 
 data_filenames = {
@@ -148,17 +148,18 @@ best_fit_params = { # including slop
     "testlin":[0.870858, 0.978703, 0.602990, 0.585983],
     "c1c2":[-0.905186, -3.151891, 0.059483, 0.171067],
     "bhc2":[1.983692, 4.567873, 2.403995, -1.134415, 0.129025, 0.495434],
-    # "rvc2":[5.558859, 1.603616, 2.716085, -0.302047, 0.361864, 0.234929] #scale of 4.5
-    "rvc2":[3.233e+00, 1.574e+00, 2.802e+00, -2.160e-01, 0, 6.04E-01],
-    "x0":[4.60604, 0.01212, 0.03839],# ordered (+slop, -slop)
-    "gamma":[0.84195, 0.16949, 0.10605]
+    "rvc2":[4.15048e+00, 1.72667e+00, 2.75122e+00, -6.90720e-04, 0.26199, 0.31046],
+    "x0":[4.57489, 0.03323, 0.00847],# ordered (+slop, -slop)
+    "gamma":[8.73904e-01, 0.20249, 0.10123]
 }
 
 all_pivots = {
     # "testlin":
     "c1c2":[1.024747],
     "bhc2":[-0.086661, 1.334268],
-    "rvc2":[-7.080e-02, 1.495e+00]
+    "rvc2":[1.664e-01, 1.421e+00],
+    "x0":[],
+    "gamma":[]
 }
 
 all_param_names = {
@@ -192,7 +193,14 @@ all_param_plot_ranges_1D = {
     "testlin":((0,2), (4,8)),
     "c1c2":((-1.1, -0.8), (-3.4, -2.8), (0.0525, 0.065), (0.065, 0.265)),
     "bhc2":((1.96, 2.0), (4.565, 4.58), (2.404, 2.410), (-1.25, -1.1), (0.115, 0.14), (0.48, 0.53)),
-    "rvc2":((1.96, 2.0), (4.565, 4.58), (2.404, 2.410), (-1.25, -1.1), (0.115, 0.14), (0.48, 0.53)),
+    "rvc2":(
+        (4.04, 4.28), 
+        (1.712, 1.742), 
+        (2.730, 2.775), 
+        (-0.02, 0.02), 
+        (0.248, 0.275), 
+        (0.292, 0.328)
+        ),
     "x0":((4.595, 4.62), (0.005, 0.02), (0.03, 0.05)),
     "gamma":((0.81, 0.88), (0.15, 0.19), (0.085, 0.13))
 }
@@ -235,7 +243,7 @@ if __name__ == '__main__':
     modelname = args.modelname
     showposterior = args.showposterior
 
-    showposterior = False
+    showposterior = True
 
     print(showposterior)
 
@@ -258,10 +266,17 @@ if __name__ == '__main__':
 
     M = len(fitted_params)
 
+    datadf = None
+    df = None
+
+    # if modelname == "x0" or "gamma":
+    #     datadf = pd.read_csv(datafilename, sep=",", names=['x', 'sx', 'y', 'sy', 'w'])
+    #     df = pd.read_csv(filename, sep=" ", header=None)
+    # else:
     datadf = pd.read_csv(datafilename, sep=",", names=['x', 'sx', 'y', 'sy', 'w'])
     df = pd.read_csv(filename, sep=" ", header=None)
 
-    print(datadf)
+    # print(datadf)
 
     x = datadf['x']
     sx = datadf['sx']
@@ -270,6 +285,8 @@ if __name__ == '__main__':
 
     ar = df.values
     ar = np.transpose(ar)
+
+    # print(df)
 
     param_samples = []
     for i in range(M):
@@ -294,9 +311,19 @@ if __name__ == '__main__':
 
     datawidth = np.ptp(x)
     x_m = np.linspace(np.min(x) - datawidth/3, np.max(x) + datawidth/3, 1000)
-    y_m = model(x_m, fitted_params, pivots)
+    y_m = np.array([model(x, fitted_params, pivots) for x in x_m])
 
-    shiftY = np.sqrt(np.power(fitted_params[-1], 2.0) + np.power(dModel(x_m, fitted_params, pivots) * fitted_params[-2], 2.0))
+    # print(x_m.shape)# y_m.shape)
+
+    shiftYup = None
+    shiftYdown = None
+
+    if modelname == "x0" or "gamma":
+        shiftYup = fitted_params[-2]
+        shiftYdown = fitted_params[-1]
+    else:
+        shiftYup = np.sqrt(np.power(fitted_params[-1], 2.0) + np.power(dModel(x_m, fitted_params, pivots) * fitted_params[-2], 2.0))
+        shiftYdown = shiftYup
 
     plt.rc('axes', labelsize=12)     # fontsize of the axes label
 
@@ -308,7 +335,13 @@ if __name__ == '__main__':
         inds = [1,3,4,6,7,9]
         for j in range(M):
             plt.subplot(M/2, 3, inds[j])
-            n, bins, patches = plt.hist(param_samples[j], bincount, density=True, facecolor='b', alpha=0.5)
+            n, bins, patches = plt.hist(
+                param_samples[j], 
+                bincount, 
+                facecolor='b', 
+                alpha=0.5, 
+                density=True
+            )
             plt.xlabel(param_names[j])
             plt.ylabel("PDF")
             plt.xlim(param_plot_ranges_1D[j])
@@ -351,9 +384,9 @@ if __name__ == '__main__':
 
     plt.errorbar(x, y, yerr=sy, xerr=sx,  fmt="o", color="k", ecolor='k', label="Data", markersize=1, elinewidth=1, alpha=0.5)
     plt.plot(x_m, y_m, label="Model", color="k", linewidth=2, alpha=0.75)
-    plt.fill_between(x_m, y_m + shiftY, y_m - shiftY, color="b", alpha=0.4)
-    plt.fill_between(x_m, y_m + 2*shiftY, y_m - 2*shiftY, color="b", alpha=0.3)
-    plt.fill_between(x_m, y_m + 3*shiftY, y_m - 3*shiftY, color="b", alpha=0.2)
+    plt.fill_between(x_m, y_m + shiftYup, y_m - shiftYdown, color="b", alpha=0.4)
+    plt.fill_between(x_m, y_m + 2*shiftYup, y_m - 2*shiftYdown, color="b", alpha=0.3)
+    plt.fill_between(x_m, y_m + 3*shiftYup, y_m - 3*shiftYdown, color="b", alpha=0.2)
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
     plt.xlim(data_plot_range[0])
