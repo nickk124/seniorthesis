@@ -149,8 +149,8 @@ best_fit_params = { # including slop
     "c1c2":[-0.905186, -3.151891, 0.059483, 0.171067],
     "bhc2":[1.983692, 4.567873, 2.403995, -1.134415, 0.129025, 0.495434],
     "rvc2":[4.15048e+00, 1.72667e+00, 2.75122e+00, -6.90720e-04, 0.26199, 0.31046],
-    "x0":[4.57489, 0.03323, 0.00847],# ordered (+slop, -slop)
-    "gamma":[8.73904e-01, 0.20249, 0.10123]
+    "x0":[4.57851, 0.01623, 0.03283],# ordered (+slop, -slop)
+    "gamma":[8.64494e-01, 0.09517, 0.18597]
 }
 
 all_pivots = {
@@ -218,7 +218,7 @@ data_plot_ranges = {
     "c1c2":((-1, 3), (-8, 7)),
     "bhc2":((-1, 3), (-1, 8)),
     "rvc2":((-1, 3), (-1, 8)),
-    "x0":((-1, 3), (4.2, 5)),
+    "x0":((-1, 2.8), (4.2, 5)),
     "gamma":((-1, 3), (0, 2))
 }
 
@@ -243,9 +243,9 @@ if __name__ == '__main__':
     modelname = args.modelname
     showposterior = args.showposterior
 
-    showposterior = True
+    showposterior = False
 
-    print(showposterior)
+    print('showposterior={}'.format(showposterior))
 
     filename = os.path.join("./histdata/",hist_filenames[modelname])
     datafilename = os.path.join("./rawdata/",data_filenames[modelname])
@@ -310,7 +310,9 @@ if __name__ == '__main__':
     # print(type(x))
 
     datawidth = np.ptp(x)
-    x_m = np.linspace(np.min(x) - datawidth/3, np.max(x) + datawidth/3, 1000)
+    width_extender_divisor = 1 if modelname == 'x0' or modelname == 'gamma' else 3
+
+    x_m = np.linspace(np.min(x) - datawidth/width_extender_divisor, np.max(x) + datawidth/width_extender_divisor, 1000)
     y_m = np.array([model(x, fitted_params, pivots) for x in x_m])
 
     # print(x_m.shape)# y_m.shape)
@@ -318,17 +320,19 @@ if __name__ == '__main__':
     shiftYup = None
     shiftYdown = None
 
-    if modelname == "x0" or "gamma":
-        shiftYup = fitted_params[-2]
-        shiftYdown = fitted_params[-1]
-    else:
+    if modelname == "x0" or "gamma": # asymmetric fits
+        shiftYup = fitted_params[-2] # plus slop
+        shiftYdown = fitted_params[-1] # minus slop
+
+        # print(fitted_params)
+    else: # symmetric fits
         shiftYup = np.sqrt(np.power(fitted_params[-1], 2.0) + np.power(dModel(x_m, fitted_params, pivots) * fitted_params[-2], 2.0))
         shiftYdown = shiftYup
 
     plt.rc('axes', labelsize=12)     # fontsize of the axes label
 
 
-    if (showposterior):
+    if showposterior:
 
         plt.figure(num=1,figsize=figdims,dpi=100,facecolor='white')
         # plot single-parameter histograms
