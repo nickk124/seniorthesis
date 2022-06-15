@@ -10,3 +10,13 @@ thesisdefense.mp4
 *.xml
 */.idea
 friends_theses
+**/*.aux
+**/*.bcf
+**/*.blg
+**/*.fdb_latexmk
+**/*.fls
+**/*.lof
+**/*.log
+**/*.out
+**/*.gz
+**/*.toc
